@@ -3,8 +3,9 @@
   "description": "Add lore text to your props",
   "version": "1.0.0",
   "author": "Cascade",
-  "icon": "/icon.svg",
   "manifest_version": 1,
+  "icon": "/icon.svg",
+  "background_url": "/",
   "action": {
     "title": "Prop Lore",
     "icon": "/icon.svg",

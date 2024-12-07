@@ -1,5 +1,15 @@
 // Wait for OBR to be ready
+const ID = 'com.prop.lore';
+
 OBR.onReady(async () => {
+    // Set theme
+    const theme = await OBR.theme.getTheme();
+    document.documentElement.classList.add(theme);
+    OBR.theme.onChange((theme) => {
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(theme);
+    });
+
     const ready = await OBR.scene.isReady();
     if (!ready) return;
 
@@ -7,7 +17,7 @@ OBR.onReady(async () => {
     async function initializeExtension() {
         // Register the context menu items
         await OBR.contextMenu.create({
-            id: "prop-lore",
+            id: `${ID}/context-menu`,
             icons: [
                 {
                     icon: "/icon.svg",
@@ -26,13 +36,13 @@ OBR.onReady(async () => {
         OBR.scene.items.onChange(async (items) => {
             const contextMenuItems = await OBR.contextMenu.getItems();
             const lorePropIds = items
-                .filter((item) => item.metadata?.propLore)
+                .filter((item) => item.metadata?.[`${ID}/lore`])
                 .map((item) => item.id);
 
             // Update context menu items based on whether items have lore
             await Promise.all(
                 contextMenuItems.map(async (menuItem) => {
-                    if (menuItem.id === "prop-lore") {
+                    if (menuItem.id === `${ID}/context-menu`) {
                         const hasLore = menuItem.context.items.some((item) =>
                             lorePropIds.includes(item.id)
                         );
@@ -59,7 +69,7 @@ OBR.onReady(async () => {
         if (items.length !== 1) return;
 
         const item = items[0];
-        const currentLore = item.metadata?.propLore || "";
+        const currentLore = item.metadata?.[`${ID}/lore`] || "";
 
         // Create popup for lore input
         const popup = document.createElement("div");
@@ -81,10 +91,9 @@ OBR.onReady(async () => {
         document.getElementById("saveBtn").onclick = async () => {
             const loreText = document.getElementById("loreText").value;
             await OBR.scene.items.updateItems([item], (items) => {
-                items[0].metadata = {
-                    ...items[0].metadata,
-                    propLore: loreText,
-                };
+                const metadata = { ...items[0].metadata };
+                metadata[`${ID}/lore`] = loreText;
+                items[0].metadata = metadata;
             });
             popup.remove();
         };
